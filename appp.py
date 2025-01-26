@@ -21,7 +21,7 @@ groq_api_key="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"
 generic_url=st.text_input("URL",label_visibility="collapsed")
 
 ## Gemma Model USsing Groq API
-llm =ChatGroq(model="Gemma-7b-It", groq_api_key=groq_api_key)
+llm =ChatGroq(model="gemma2-9b-it", groq_api_key=groq_api_key)
 
 prompt_template="""
 Provide a summary of the following content in 300 words:
