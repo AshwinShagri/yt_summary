@@ -11,7 +11,7 @@ from langchain.docstore.document import Document
 ## Streamlit APP
 st.set_page_config(page_title="LangChain: Summarize Text From YT or Website", page_icon="🦜")
 st.title("🦜 LangChain: Summarize Text From YT or Website")
-st.subheader('Summarize URL')
+st.subheader("Summarize URL")
 
 ## Get the Groq API Key and URL (YT or website) to be summarized
 groq_api_key = "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"
@@ -36,7 +36,7 @@ if st.button("Summarize the Content from YT or Website"):
     else:
         try:
             with st.spinner("Waiting..."):
-                ## Loading the website or YT video data
+                docs = None
                 if "youtube.com" in generic_url or "youtu.be" in generic_url:
                     # Extract the video ID from the generic URL
                     video_id = (
@@ -45,16 +45,23 @@ if st.button("Summarize the Content from YT or Website"):
                         else generic_url.split("/")[-1]
                     )
                     try:
-                        # Attempt to fetch the manual transcript in English
+                        # Attempt to fetch the English transcript
                         transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en"])
                     except Exception as e:
-                        st.warning("Manual English transcript not found, trying auto-generated transcript...")
+                        st.warning("Manual English transcript not found. Attempting auto-generated English transcript...")
                         try:
                             # Fallback to auto-generated English transcript
                             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["a.en"])
                         except Exception as e:
-                            st.error(f"Error fetching transcript: {e}")
-                            transcript = None
+                            st.warning("English transcript unavailable. Fetching transcript in the first available language...")
+                            try:
+                                # Get available languages for the video
+                                transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+                                # Select the first available transcript
+                                transcript = transcript_list.find_transcript([lang.language_code for lang in transcript_list]).fetch()
+                            except Exception as e:
+                                st.error(f"Error fetching transcript: {e}")
+                                transcript = None
 
                     if transcript:
                         # Format the transcript
@@ -62,9 +69,8 @@ if st.button("Summarize the Content from YT or Website"):
                         transcript_text = formatter.format_transcript(transcript)
                         # Convert transcript into a format compatible with LangChain
                         docs = [Document(page_content=transcript_text)]
-                    else:
-                        docs = None
                 else:
+                    # For non-YouTube URLs
                     loader = UnstructuredURLLoader(
                         urls=[generic_url],
                         ssl_verify=False,
