@@ -95,4 +95,4 @@ if st.button("Summarize the Content from YT or Website"):
                     output_summary = chain.run(docs)
                     st.success(output_summary)
                 else:
-                    st.error("No content could be extracted from the
+                    st.error("No content could be extracted from the provided URL")
