@@ -93,3 +93,8 @@ if st.button("Summarize the Content from YT or Website"):
                 if docs:
                     chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
                     output_summary = chain.run(docs)
+                    st.success(output_summary)
+                else:
+                    st.error("No content could be extracted from the provided URL.")
+        except Exception as e:
+            st.exception(f"Exception: {e}")
