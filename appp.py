@@ -18,7 +18,11 @@ generic_url = st.text_input("URL", label_visibility="collapsed")
 
 # Initialize the T5 model
 hugging_face_api_key = "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"  # Get a free API key from Hugging Face
-llm = HuggingFaceHub(repo_id="t5-base", api_key=hugging_face_api_key)
+llm = HuggingFaceHub(
+    repo_id="t5-small",
+    max_tokens=2048,
+    model_kwargs={"use_auth_token": hugging_face_api_key},
+)
 
 # Prompt template for summarization
 prompt_template = """
@@ -89,8 +93,3 @@ if st.button("Summarize the Content from YT or Website"):
                 if docs:
                     chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
                     output_summary = chain.run(docs)
-                    st.success(output_summary)
-                else:
-                    st.error("No content could be extracted from the provided URL.")
-        except Exception as e:
-            st.exception(f"Exception: {e}")
