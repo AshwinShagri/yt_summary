@@ -1,7 +1,7 @@
 import validators
 import streamlit as st
 from langchain import LLMChain, PromptTemplate
-from langchain.llms import HuggingFaceHub
+from langchain.llms import HuggingFaceInference
 from langchain.chains.summarize import load_summarize_chain
 from langchain_community.document_loaders import UnstructuredURLLoader
 from youtube_transcript_api import YouTubeTranscriptApi
@@ -18,10 +18,10 @@ generic_url = st.text_input("URL", label_visibility="collapsed")
 
 # Initialize the T5 model
 hugging_face_api_key = "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"  # Get a free API key from Hugging Face
-llm = HuggingFaceHub(
-    repo_id="t5-small",
+llm = HuggingFaceInference(
+    repo_id="t5-base",
     max_tokens=2048,
-    model_kwargs={"use_auth_token": hugging_face_api_key},
+    api_key=hugging_face_api_key,
 )
 
 # Prompt template for summarization
@@ -97,4 +97,4 @@ if st.button("Summarize the Content from YT or Website"):
                 else:
                     st.error("No content could be extracted from the provided URL.")
         except Exception as e:
-            st.exception(f"Exception: {e}")
+            st.exception(f"Exception)
