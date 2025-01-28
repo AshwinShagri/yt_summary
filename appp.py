@@ -47,28 +47,33 @@ if st.button("Summarize the Content from YT or Website"):
                     try:
                         # Attempt to fetch the English transcript
                         transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en"])
-                    except Exception as e:
+                    except Exception:
                         st.warning("Manual English transcript not found. Attempting auto-generated English transcript...")
                         try:
-                            # Fallback to auto-generated English transcript
                             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["a.en"])
-                        except Exception as e:
-                            st.warning("English transcript unavailable. Fetching transcript in the first available language...")
+                        except Exception:
+                            st.warning("English transcript unavailable. Checking for available subtitles in other languages...")
                             try:
-                                # Get available languages for the video
+                                # Check if there are other available transcripts
                                 transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-                                # Select the first available transcript
-                                transcript = transcript_list.find_transcript([lang.language_code for lang in transcript_list]).fetch()
+                                # Get the first available transcript
+                                transcript = transcript_list.find_transcript(
+                                    [lang.language_code for lang in transcript_list]
+                                ).fetch()
                             except Exception as e:
-                                st.error(f"Error fetching transcript: {e}")
+                                if "Subtitles are disabled for this video" in str(e):
+                                    st.error("Subtitles are disabled for this video. No transcript is available.")
+                                else:
+                                    st.error(f"Error fetching transcript: {e}")
                                 transcript = None
 
                     if transcript:
-                        # Format the transcript
+                        # Format and process the transcript
                         formatter = TextFormatter()
                         transcript_text = formatter.format_transcript(transcript)
-                        # Convert transcript into a format compatible with LangChain
                         docs = [Document(page_content=transcript_text)]
+                    else:
+                        docs = None
                 else:
                     # For non-YouTube URLs
                     loader = UnstructuredURLLoader(
