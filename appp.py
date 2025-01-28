@@ -1,7 +1,7 @@
 import validators
 import streamlit as st
-from langchain.prompts import PromptTemplate
-from langchain.llms import HuggingFaceInstruct
+from langchain import LLMChain, PromptTemplate
+from langchain.llms import HuggingFaceHub
 from langchain.chains.summarize import load_summarize_chain
 from langchain_community.document_loaders import UnstructuredURLLoader
 from youtube_transcript_api import YouTubeTranscriptApi
@@ -18,10 +18,7 @@ generic_url = st.text_input("URL", label_visibility="collapsed")
 
 # Initialize the T5 model
 hugging_face_api_key = "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"  # Get a free API key from Hugging Face
-llm = HuggingFaceInstruct.from_pretrained(
-    "t5-base",
-    api_key=hugging_face_api_key
-)
+llm = HuggingFaceHub(repo_id="t5-base", api_key=hugging_face_api_key)
 
 # Prompt template for summarization
 prompt_template = """
